@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Fantasy Console</title>
+    <script type="module">
+
+        const script = [
+            { "type": "receiveGo" },
+            {
+                "type": "doRepeat",
+                "args": [
+                    { "type": "int", "value": 10 },
+                    { "type": "forward", "value": "10" },
+                    { "type": "turn", "value": "15" },
+                    {
+                        "type": "bubble",
+                        "args": [
+                            {
+                                "type": "reportVariadicSum",
+                                "args": [
+                                    { "type": "xPosition" },
+                                    { "type": "yPosition" }
+                                ]
+                            }
+                        ]
+                    },
+                    { "type": "doWait", "value": "0.2" }
+                ]
+            }
+        ];
+
+        const canvas = document.getElementById("canvas");
+        const render = canvas.getContext("2d");
+
+        // stuff like while loops that contain statements
+        // returns next x,y to draw at
+        function drawBlock(x, y) {
+
+        }
+
+        // stuff like print that just does a thing
+        // returns next x,y to draw at
+        function drawStatement(x, y) {
+
+        }
+
+        // stuff like addition that returns a thing
+        // returns its width
+        function drawExpression(x, y) {
+
+        }
+
+        render.clearRect(0, 0, render.canvas.width, render.canvas.height);
+
+        const grad = render.createLinearGradient(0, 0, 0, 30);
+        grad.addColorStop(1, "#67e");
+        grad.addColorStop(0, "#45c"); 
+
+        render.strokeStyle = "#45c";
+        render.fillStyle = grad;
+        render.lineJoin = "round";
+        render.lineWidth = 3;
+
+        render.beginPath();
+
+        // Set start-point
+        render.moveTo(0, 0);
+
+        // Set sub-points
+        render.lineTo(100, 0);
+        render.lineTo(100, 30);
+        render.lineTo(0, 30);
+
+        // Set end-point
+        render.closePath();
+
+        render.fill();
+        render.stroke();
+
+        render.fillStyle = "white";
+        render.font = "bold 15px Arial";
+        // alert(render.measureText("Hello World").width);
+        render.fillText("Hello World", 8, 20);
+    </script>
+</head>
+<body>
+    <canvas id="canvas" width="600" height="600" style="border: 1px solid black;"></canvas>
+</body>
+</html>
