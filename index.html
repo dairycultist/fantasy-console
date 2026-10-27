@@ -33,16 +33,49 @@
         const canvas = document.getElementById("canvas");
         const render = canvas.getContext("2d");
 
-        // stuff like while loops that contain statements
-        // returns next x,y to draw at
-        function drawBlock(x, y) {
-
-        }
-
-        // stuff like print that just does a thing
+        // stuff like 1. print that just does a thing or 2. while loops that contain other statements
         // returns next x,y to draw at
         function drawStatement(x, y) {
 
+            const grad = render.createLinearGradient(0, 0, 0, 30);
+            grad.addColorStop(1, "#67e");
+            grad.addColorStop(0, "#45c"); 
+
+            render.strokeStyle = "#45c";
+            render.fillStyle = grad;
+            render.lineJoin = "round";
+            render.lineWidth = 3;
+
+            render.beginPath();
+
+            render.moveTo(x, y);
+
+            render.lineTo(x + 5, y);
+            render.lineTo(x + 10, y + 5);
+            render.lineTo(x + 15, y + 5);
+            render.lineTo(x + 20, y);
+
+            render.lineTo(x + 100, y);
+            render.lineTo(x + 100, y + 30);
+
+            render.lineTo(x + 20, y + 30);
+            render.lineTo(x + 15, y + 35);
+            render.lineTo(x + 10, y + 35);
+            render.lineTo(x + 5, y + 30);
+
+            render.lineTo(x, y + 30);
+
+            render.closePath();
+
+            render.fill();
+            render.stroke();
+
+            render.fillStyle = "white";
+            render.font = "bold 15px Arial";
+            // alert(render.measureText("Hello World").width);
+            render.fillText("Hello World", x + 8, y + 20);
+
+            return x, y + 30;
         }
 
         // stuff like addition that returns a thing
@@ -53,35 +86,8 @@
 
         render.clearRect(0, 0, render.canvas.width, render.canvas.height);
 
-        const grad = render.createLinearGradient(0, 0, 0, 30);
-        grad.addColorStop(1, "#67e");
-        grad.addColorStop(0, "#45c"); 
-
-        render.strokeStyle = "#45c";
-        render.fillStyle = grad;
-        render.lineJoin = "round";
-        render.lineWidth = 3;
-
-        render.beginPath();
-
-        // Set start-point
-        render.moveTo(0, 0);
-
-        // Set sub-points
-        render.lineTo(100, 0);
-        render.lineTo(100, 30);
-        render.lineTo(0, 30);
-
-        // Set end-point
-        render.closePath();
-
-        render.fill();
-        render.stroke();
-
-        render.fillStyle = "white";
-        render.font = "bold 15px Arial";
-        // alert(render.measureText("Hello World").width);
-        render.fillText("Hello World", 8, 20);
+        drawStatement(20, 20);
+        drawStatement(20, 50);
     </script>
 </head>
 <body>
