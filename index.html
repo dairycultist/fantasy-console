@@ -7,7 +7,7 @@
 
         // design
         // (statements) default | nested | initial | final
-        // (expressions) input | round | diamond
+        // (expressions) input | dropdown | round | diamond
 
         const blockCategories = {
             "control": {
@@ -38,18 +38,23 @@
                 "design": "nested",
                 "category": "control"
             },
+            "if": {
+                "format": "If _",
+                "design": "nested",
+                "category": "control"
+            },
             "bubble": {
                 "format": "Say _",
                 "design": "default",
                 "category": "action"
             },
             "forward": {
-                "format": "Forward _",
+                "format": "Move forward _",
                 "design": "default",
                 "category": "action"
             },
             "turn": {
-                "format": "Turn _",
+                "format": "Turn _ degrees",
                 "design": "default",
                 "category": "action"
             },
@@ -63,9 +68,15 @@
                 "design": "round",
                 "category": "operator"
             },
+            "and": {
+                "format": "_ and _",
+                "design": "diamond",
+                "category": "operator"
+            },
             "int": { "design": "input" },
             "float": { "design": "input" },
-            "string": { "design": "input" }
+            "string": { "design": "input" },
+            "bool": { "design": "input" }
         };
 
         const scripts = [
@@ -112,6 +123,36 @@
                             }
                         ]
                     },
+                    {
+                        "type": "if",
+                        "args": [
+                            {
+                                "type": "and",
+                                "args": [
+                                    { "type": "bool", "value": true },
+                                    { "type": "bool", "value": false }
+                                ]
+                            }
+                        ],
+                        "children": [
+                            { "type": "forward", "args": [ { "type": "int", "value": 100 } ] }
+                        ]
+                    },
+                ]
+            },
+            {
+                "x": 200,
+                "y": 20,
+                "blocks": [
+                    {
+                        "type": "bubble",
+                        "args": [
+                            {
+                                "type": "string",
+                                "value": "Hello!"
+                            }
+                        ]
+                    },
                 ]
             }
         ];
@@ -130,11 +171,17 @@
 
             canvas.addEventListener("mousedown", (event) => {
 
-                heldScript = scripts[0];
-                canvas.style.cursor = "grabbing";
+                if (event.button != 0)
+                    return;
 
                 const x = event.offsetX / canvas.offsetWidth * canvas.width;
                 const y = event.offsetY / canvas.offsetHeight * canvas.height;
+
+                if (!blockAABBContainsPoint(x, y, scripts[0].x, scripts[0].y, scripts[0].blocks[0]))
+                    return;
+
+                heldScript = scripts[0];
+                canvas.style.cursor = "grabbing";
 
                 heldOffsetX = heldScript.x - x;
                 heldOffsetY = heldScript.y - y;
@@ -429,6 +476,11 @@
             }
 
             return width;
+        }
+
+        function blockAABBContainsPoint(x, y, blockX, blockY, block) {
+
+            return x > blockX && x < blockX + calculateBlockWidth(block) && y > blockY && y < blockY + 30;
         }
     </script>
 </head>
