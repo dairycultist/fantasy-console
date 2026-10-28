@@ -196,11 +196,23 @@
 
             canvas.addEventListener("mousemove", (event) => {
 
-                if (!heldScript)
-                    return;
-
                 const x = event.offsetX / canvas.offsetWidth * canvas.width;
                 const y = event.offsetY / canvas.offsetHeight * canvas.height;
+
+                if (!heldScript) {
+
+                    for (const script of scripts) {
+
+                        if (blocksContainPoint(x, y, script.x, script.y, script.blocks).result) {
+
+                            canvas.style.cursor = "grab";
+                            return;
+                        }
+                    }
+
+                    canvas.style.cursor = "default";
+                    return;
+                }
 
                 heldScript.x = x + heldOffsetX;
                 heldScript.y = y + heldOffsetY;
