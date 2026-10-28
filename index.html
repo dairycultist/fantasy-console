@@ -125,8 +125,6 @@
                 grad.addColorStop(1, "#67e");
             }
 
-            render.font = "bold 15px Arial";
-
             let width = calculateBlockWidth(statement);
 
             const nubOffset = design == "nested" ? 20 : 0;
@@ -203,6 +201,7 @@
             switch (types[block.type].design) {
 
                 case "input":
+                    render.font = "15px Arial";
                     width = render.measureText("" + block.value).width + 8; break;
                 case "default":
                 case "nested":
@@ -210,6 +209,7 @@
                 case "final":
                 case "round":
                 case "diamond":
+                    render.font = "bold 15px Arial";
                     width += render.measureText(types[block.type].format.replace("_", "")).width + 17;
                     if (block.args)
                         for (const arg of block.args)
@@ -240,11 +240,13 @@
                 render.shadowOffsetX = 1;
                 render.shadowOffsetY = 1;
                 render.fillStyle = "white";
+                render.font = "bold 15px Arial";
 
                 render.fillText(parts[i], x, y);
-                render.restore();
 
                 x += render.measureText(parts[i]).width;
+
+                render.restore();
 
                 // draw the following argument
                 x += drawExpression(x, y, block.args[i]);
@@ -258,6 +260,7 @@
             render.shadowOffsetX = 1;
             render.shadowOffsetY = 1;
             render.fillStyle = "white";
+            render.font = "bold 15px Arial";
 
             render.fillText(parts[parts.length - 1], x, y);
             render.restore();
@@ -286,6 +289,7 @@
                     render.strokeRect(x, y - 15, width, 20);
 
                     render.fillStyle = "black";
+                    render.font = "15px Arial";
                     render.fillText("" + expression.value, x + 4, y);
                     break;
                 
