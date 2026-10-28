@@ -35,11 +35,31 @@
 
         // stuff like 1. print that just does a thing or 2. while loops that contain other statements
         // returns next x,y to draw at
-        function drawStatement(x, y) {
+        function drawStatement(x, y, statement) {
+
+            // if we have any, process all children so we know where this block ends
+            let newX = x;
+            let newY = y + 30;
+
+            if (statement.args) {
+
+                newX += 20;
+
+                for (const arg of statement.args)
+                    newX, newY = drawStatement(newX, newY, arg);
+
+                newX -= 20;
+                newY += 10;
+            }
+
+            render.font = "bold 15px Arial";
 
             const grad = render.createLinearGradient(0, 0, 0, 30);
             grad.addColorStop(1, "#67e");
             grad.addColorStop(0, "#45c"); 
+
+            const width = render.measureText(statement.type).width + 20;
+            const nubOffset = statement.args ? 20 : 0;
 
             render.strokeStyle = "#45c";
             render.fillStyle = grad;
@@ -47,7 +67,6 @@
             render.lineWidth = 3;
 
             render.beginPath();
-
             render.moveTo(x, y);
 
             render.lineTo(x + 5, y);
@@ -55,39 +74,39 @@
             render.lineTo(x + 15, y + 5);
             render.lineTo(x + 20, y);
 
-            render.lineTo(x + 100, y);
-            render.lineTo(x + 100, y + 30);
+            render.lineTo(x + width, y);
+            render.lineTo(x + width, y + 30);
 
-            render.lineTo(x + 20, y + 30);
-            render.lineTo(x + 15, y + 35);
-            render.lineTo(x + 10, y + 35);
-            render.lineTo(x + 5, y + 30);
+            render.lineTo(x + 20 + nubOffset, y + 30);
+            render.lineTo(x + 15 + nubOffset, y + 35);
+            render.lineTo(x + 10 + nubOffset, y + 35);
+            render.lineTo(x + 5  + nubOffset, y + 30);
 
             render.lineTo(x, y + 30);
 
             render.closePath();
-
             render.fill();
             render.stroke();
 
             render.fillStyle = "white";
-            render.font = "bold 15px Arial";
-            // alert(render.measureText("Hello World").width);
-            render.fillText("Hello World", x + 8, y + 20);
+            render.fillText(statement.type, x + 8, y + 20);
 
-            return x, y + 30;
+            return newX, newY;
         }
 
         // stuff like addition that returns a thing
         // returns its width
-        function drawExpression(x, y) {
+        function drawExpression(x, y, expression) {
 
         }
 
         render.clearRect(0, 0, render.canvas.width, render.canvas.height);
 
-        drawStatement(20, 20);
-        drawStatement(20, 50);
+        let x = 20, y = 20;
+
+        for (const arg of script) {
+            x, y = drawStatement(x, y, arg);
+        }
     </script>
 </head>
 <body>
