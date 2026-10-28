@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Fantasy Console</title>
-    <script type="module">
+    <script>
 
         // design
         // (statements) default | nested | initial | final
@@ -110,10 +110,22 @@
             },
         ];
 
-        const canvas = document.getElementById("canvas");
-        const render = canvas.getContext("2d");
+        let render;
 
-        // stuff like 1. print that just does a thing or 2. while loops that contain other statements
+        function rerender() {
+
+            if (!render)
+                render = document.getElementById("canvas").getContext("2d");
+
+            render.clearRect(0, 0, render.canvas.width, render.canvas.height);
+
+            let x = 20, y = 20;
+
+            for (const block of script)
+                x, y = drawStatement(x, y, block);
+        }
+
+        // blocks that stack vertically with other blocks and maybe contain other blocks
         // returns next x,y to draw at
         function drawStatement(x, y, statement) {
 
@@ -292,7 +304,7 @@
             render.restore();
         }
 
-        // stuff like addition that returns a thing
+        // blocks that slot into other blocks
         // returns its width
         function drawExpression(x, y, expression) {
 
@@ -346,16 +358,9 @@
 
             return width;
         }
-
-        render.clearRect(0, 0, render.canvas.width, render.canvas.height);
-
-        let x = 20, y = 20;
-
-        for (const arg of script)
-            x, y = drawStatement(x, y, arg);
     </script>
 </head>
-<body>
+<body onload="rerender();">
     <canvas id="canvas" width="600" height="600" style="border: 1px solid black;"></canvas>
 </body>
 </html>
