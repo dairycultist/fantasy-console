@@ -9,34 +9,59 @@
         // (statements) default | nested | initial | final
         // (expressions) input | round | diamond
 
-        const types = {
+        const blockCategories = {
+            "control": {
+                "topColor": "#f73",
+                "bottomColor": "#d50",
+                "strokeColor": "#850"
+            },
+            "action": {
+                "topColor": "#67e",
+                "bottomColor": "#45c",
+                "strokeColor": "#45c"
+            },
+            "operator": {
+                "topColor": "#6e0",
+                "bottomColor": "#4c0",
+                "strokeColor": "green"
+            }
+        };
+
+        const blockTypes = {
             "receiveGo": {
                 "format": "When program starts",
-                "design": "initial"
+                "design": "initial",
+                "category": "control"
             },
             "doRepeat": {
                 "format": "Repeat _ times",
-                "design": "nested"
+                "design": "nested",
+                "category": "control"
             },
             "bubble": {
                 "format": "Say _",
-                "design": "default"
+                "design": "default",
+                "category": "action"
             },
             "forward": {
                 "format": "Forward _",
-                "design": "default"
+                "design": "default",
+                "category": "action"
             },
             "turn": {
                 "format": "Turn _",
-                "design": "default"
+                "design": "default",
+                "category": "action"
             },
             "doWait": {
                 "format": "Wait _ seconds",
-                "design": "default"
+                "design": "default",
+                "category": "action"
             },
             "reportVariadicSum": {
                 "format": "_ + _",
-                "design": "round"
+                "design": "round",
+                "category": "operator"
             },
             "int": { "design": "input" },
             "float": { "design": "input" },
@@ -92,14 +117,18 @@
         // returns next x,y to draw at
         function drawStatement(x, y, statement) {
 
-            if (!types[statement.type]) {
+            if (!blockTypes[statement.type]) {
 
                 console.log("Skipping unknown block (type: \"" + statement.type + "\")");
                 return 0;
             }
 
-            const design = types[statement.type].design;
-            const grad = render.createLinearGradient(0, 0, 0, 30);
+            const design = blockTypes[statement.type].design;
+            const category = blockCategories[blockTypes[statement.type].category] ?? {
+                "topColor": "#bbb",
+                "bottomColor": "#888",
+                "strokeColor": "#555"
+            };
 
             // if we have any, process all children so we know where this block ends
             let newX = x;
@@ -113,17 +142,14 @@
                     newX, newY = drawStatement(newX, newY, arg);
 
                 newX -= 20;
-
-                render.strokeStyle = "#850";
-                grad.addColorStop(0, "#c70");
-                grad.addColorStop(1, "#e84");
-
-            } else {
-
-                render.strokeStyle = "#45c";
-                grad.addColorStop(0, "#45c");
-                grad.addColorStop(1, "#67e");
             }
+
+            // draw ourselves
+            const grad = render.createLinearGradient(0, y, 0, y + 30);
+
+            render.strokeStyle = category.strokeColor;
+            grad.addColorStop(0, category.topColor);
+            grad.addColorStop(1, category.bottomColor);
 
             let width = calculateBlockWidth(statement);
 
@@ -190,7 +216,7 @@
 
         function calculateBlockWidth(block) {
 
-            if (!types[block.type]) {
+            if (!blockTypes[block.type]) {
 
                 console.log("Skipping unknown block (type: \"" + block.type + "\")");
                 return 0;
@@ -198,7 +224,7 @@
 
             let width = 0;
 
-            switch (types[block.type].design) {
+            switch (blockTypes[block.type].design) {
 
                 case "input":
                     render.font = "15px Arial";
@@ -210,7 +236,7 @@
                 case "round":
                 case "diamond":
                     render.font = "bold 15px Arial";
-                    width += render.measureText(types[block.type].format.replace("_", "")).width + 17;
+                    width += render.measureText(blockTypes[block.type].format.replace("_", "")).width + 17;
                     if (block.args)
                         for (const arg of block.args)
                             width += calculateBlockWidth(arg);
@@ -222,13 +248,13 @@
 
         function drawTextAndArguments(x, y, block) {
 
-            if (!types[block.type]) {
+            if (!blockTypes[block.type]) {
 
                 console.log("Skipping unknown block (type: \"" + block.type + "\")");
                 return 0;
             }
 
-            const parts = types[block.type].format.split("_");
+            const parts = blockTypes[block.type].format.split("_");
 
             for (let i = 0; i < parts.length - 1; i++) {
 
@@ -270,15 +296,28 @@
         // returns its width
         function drawExpression(x, y, expression) {
 
-            if (!types[expression.type]) {
+            if (!blockTypes[expression.type]) {
 
                 console.log("Skipping unknown block (type: \"" + expression.type + "\")");
                 return 0;
             }
 
             const width = calculateBlockWidth(expression);
+            const category = blockCategories[blockTypes[expression.type].category] ?? {
+                "topColor": "#bbb",
+                "bottomColor": "#888",
+                "strokeColor": "#555"
+            };
 
-            switch (types[expression.type].design) {
+            const grad = render.createLinearGradient(0, y - 10, 0, y + 10);
+
+            render.strokeStyle = category.strokeColor;
+            grad.addColorStop(0, category.topColor);
+            grad.addColorStop(1, category.bottomColor);
+
+            render.fillStyle = grad;
+
+            switch (blockTypes[expression.type].design) {
 
                 case "input":
                     render.strokeStyle = "grey";
@@ -294,8 +333,6 @@
                     break;
                 
                 case "round":
-                    render.strokeStyle = "green";
-                    render.fillStyle = "#6e0";
                     render.lineWidth = 1;
 
                     render.beginPath();
