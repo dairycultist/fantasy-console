@@ -60,7 +60,13 @@
                                 "type": "reportVariadicSum",
                                 "args": [
                                     { "type": "int", "value": "5" },
-                                    { "type": "int", "value": "17" }
+                                    {
+                                        "type": "reportVariadicSum",
+                                        "args": [
+                                            { "type": "int", "value": "20" },
+                                            { "type": "int", "value": "17" }
+                                        ]
+                                    }
                                 ]
                             }
                         ]
@@ -86,18 +92,20 @@
         // returns next x,y to draw at
         function drawStatement(x, y, statement) {
 
-            const type = types[statement.type] ? types[statement.type] : {
-                "format": statement.type,
-                "design": statement.children ? "nested" : "default"
-            };
+            if (!types[statement.type]) {
 
+                console.log("Skipping unknown block (type " + block.type + ")");
+                return 0;
+            }
+
+            const design = types[statement.type].design;
             const grad = render.createLinearGradient(0, 0, 0, 30);
 
             // if we have any, process all children so we know where this block ends
             let newX = x;
             let newY = y + 30;
 
-            if (type.design == "nested") {
+            if (design == "nested") {
 
                 newX += 20;
 
@@ -121,7 +129,7 @@
 
             let width = calculateBlockWidth(statement);
 
-            const nubOffset = type.design == "nested" ? 20 : 0;
+            const nubOffset = design == "nested" ? 20 : 0;
 
             render.fillStyle = grad;
             render.lineJoin = "round";
@@ -130,7 +138,7 @@
             render.beginPath();
             render.moveTo(x, y);
 
-            if (type.design != "initial") {
+            if (design != "initial") {
 
                 render.lineTo(x + 5, y);
                 render.lineTo(x + 10, y + 5);
@@ -146,7 +154,7 @@
             render.lineTo(x + 10 + nubOffset, y + 35);
             render.lineTo(x + 5  + nubOffset, y + 30);
 
-            if (type.design != "nested") {
+            if (design != "nested") {
 
                 render.lineTo(x, y + 30);
 
@@ -184,8 +192,11 @@
 
         function calculateBlockWidth(block) {
 
-            if (!types[block.type])
+            if (!types[block.type]) {
+
+                console.log("Skipping unknown block (type " + block.type + ")");
                 return 0;
+            }
 
             let width = 0;
 
@@ -211,12 +222,13 @@
 
         function drawTextAndArguments(x, y, block) {
 
-            const type = types[block.type] ? types[block.type] : {
-                "format": block.type,
-                "design": block.children ? "nested" : "default"
-            };
+            if (!types[block.type]) {
 
-            const parts = type.format.split("_");
+                console.log("Skipping unknown block (type " + block.type + ")");
+                return 0;
+            }
+
+            const parts = types[block.type].format.split("_");
 
             for (let i = 0; i < parts.length - 1; i++) {
 
@@ -255,8 +267,11 @@
         // returns its width
         function drawExpression(x, y, expression) {
 
-            if (!types[expression.type])
+            if (!types[expression.type]) {
+
+                console.log("Skipping unknown block (type " + block.type + ")");
                 return 0;
+            }
 
             const width = calculateBlockWidth(expression);
 
@@ -276,7 +291,7 @@
                 
                 case "round":
                     render.strokeStyle = "green";
-                    render.fillStyle = "#8f4";
+                    render.fillStyle = "#6e0";
                     render.lineWidth = 1;
 
                     render.beginPath();
@@ -284,7 +299,7 @@
                     render.fill();
                     render.stroke();
 
-                    drawTextAndArguments(x + 12, y, expression);
+                    drawTextAndArguments(x + 13, y, expression);
                     break;
             }
 
