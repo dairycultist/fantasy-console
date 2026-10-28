@@ -5,7 +5,9 @@
     <title>Fantasy Console</title>
     <script type="module">
 
-        // design: default | nested | initial | final
+        // design
+        // (statements) default | nested | initial | final
+        // (expressions) input | round | diamond
 
         const types = {
             "receiveGo": {
@@ -19,7 +21,26 @@
             "bubble": {
                 "format": "Say _",
                 "design": "default"
-            }
+            },
+            "forward": {
+                "format": "Forward _",
+                "design": "default"
+            },
+            "turn": {
+                "format": "Turn _",
+                "design": "default"
+            },
+            "doWait": {
+                "format": "Wait _ seconds",
+                "design": "default"
+            },
+            "reportVariadicSum": {
+                "format": "_ + _",
+                "design": "round"
+            },
+            "int": { "design": "input" },
+            "float": { "design": "input" },
+            "string": { "design": "input" }
         };
 
         const script = [
@@ -27,24 +48,24 @@
             {
                 "type": "doRepeat",
                 "args": [
-                    { "type": "int", "value": 10 },
+                    { "type": "int", "value": 10 }
                 ],
                 "children": [
-                    { "type": "forward", "value": "10" },
-                    { "type": "turn", "value": "15" },
+                    { "type": "forward", "args": [ { "type": "int", "value": 10 } ] },
+                    { "type": "turn", "args": [ { "type": "int", "value": 15 } ] },
                     {
                         "type": "bubble",
                         "args": [
                             {
                                 "type": "reportVariadicSum",
                                 "args": [
-                                    { "type": "xPosition" },
-                                    { "type": "yPosition" }
+                                    { "type": "int", "value": "5" },
+                                    { "type": "int", "value": "17" }
                                 ]
                             }
                         ]
                     },
-                    { "type": "doWait", "value": "0.2" }
+                    { "type": "doWait", "args": [ { "type": "float", "value": 0.2 } ] }
                 ]
             },
             {
@@ -98,19 +119,13 @@
 
             render.font = "bold 15px Arial";
 
-            let width = render.measureText(type.format.replace("_", "")).width + 20;
-
-            if (statement.args) {
-
-                for (const arg of statement.args)
-                    width += calculateExpressionWidth(arg);
-            }
+            let width = calculateBlockWidth(statement);
 
             const nubOffset = type.design == "nested" ? 20 : 0;
 
             render.fillStyle = grad;
             render.lineJoin = "round";
-            render.lineWidth = 3;
+            render.lineWidth = 2;
 
             render.beginPath();
             render.moveTo(x, y);
@@ -162,11 +177,46 @@
             render.fill();
             render.stroke();
 
-            // draw text and argument expressions
-            const parts = type.format.split("_");
+            drawTextAndArguments(x + 8, y + 20, statement);
 
-            x += 8;
-            y += 20;
+            return newX, newY;
+        }
+
+        function calculateBlockWidth(block) {
+
+            if (!types[block.type])
+                return 0;
+
+            let width = 0;
+
+            switch (types[block.type].design) {
+
+                case "input":
+                    width = render.measureText("" + block.value).width + 8; break;
+                case "default":
+                case "nested":
+                case "initial":
+                case "final":
+                case "round":
+                case "diamond":
+                    width += render.measureText(types[block.type].format.replace("_", "")).width + 17;
+                    if (block.args)
+                        for (const arg of block.args)
+                            width += calculateBlockWidth(arg);
+                    break;
+            }
+
+            return width;
+        }
+
+        function drawTextAndArguments(x, y, block) {
+
+            const type = types[block.type] ? types[block.type] : {
+                "format": block.type,
+                "design": block.children ? "nested" : "default"
+            };
+
+            const parts = type.format.split("_");
 
             for (let i = 0; i < parts.length - 1; i++) {
 
@@ -185,7 +235,7 @@
                 x += render.measureText(parts[i]).width;
 
                 // draw the following argument
-                x += drawExpression(x, y, statement.args[i]);
+                x += drawExpression(x, y, block.args[i]);
             }
 
             // draw the last part of text
@@ -199,42 +249,46 @@
 
             render.fillText(parts[parts.length - 1], x, y);
             render.restore();
-
-            return newX, newY;
-        }
-
-        function calculateExpressionWidth(expression) {
-
-            if (expression.type == "int" || expression.type == "string") {
-
-                return render.measureText("" + expression.value).width + 8;
-            }
-
-            return 0;
         }
 
         // stuff like addition that returns a thing
         // returns its width
         function drawExpression(x, y, expression) {
 
-            if (expression.type == "int" || expression.type == "string") {
+            if (!types[expression.type])
+                return 0;
 
-                render.strokeStyle = "black";
-                render.fillStyle = "white";
-                render.lineWidth = 1;
+            const width = calculateBlockWidth(expression);
 
-                const width = calculateExpressionWidth(expression);
+            switch (types[expression.type].design) {
 
-                render.fillRect(x, y - 15, width, 20);
-                render.strokeRect(x, y - 15, width, 20);
+                case "input":
+                    render.strokeStyle = "grey";
+                    render.fillStyle = "white";
+                    render.lineWidth = 1;
 
-                render.fillStyle = "black";
-                render.fillText("" + expression.value, x + 4, y);
+                    render.fillRect(x, y - 15, width, 20);
+                    render.strokeRect(x, y - 15, width, 20);
 
-                return width;
+                    render.fillStyle = "black";
+                    render.fillText("" + expression.value, x + 4, y);
+                    break;
+                
+                case "round":
+                    render.strokeStyle = "green";
+                    render.fillStyle = "#8f4";
+                    render.lineWidth = 1;
+
+                    render.beginPath();
+                    render.roundRect(x, y - 17, width, 24, 12);
+                    render.fill();
+                    render.stroke();
+
+                    drawTextAndArguments(x + 12, y, expression);
+                    break;
             }
 
-            return 0;
+            return width;
         }
 
         render.clearRect(0, 0, render.canvas.width, render.canvas.height);
