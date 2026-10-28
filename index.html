@@ -15,6 +15,10 @@
             "doRepeat": {
                 "format": "Repeat _ times",
                 "design": "nested"
+            },
+            "bubble": {
+                "format": "Say _",
+                "design": "default"
             }
         };
 
@@ -94,7 +98,14 @@
 
             render.font = "bold 15px Arial";
 
-            const width = render.measureText(type.format).width + 20 + 100;
+            let width = render.measureText(type.format.replace("_", "")).width + 20;
+
+            if (statement.args) {
+
+                for (const arg of statement.args)
+                    width += calculateExpressionWidth(arg);
+            }
+
             const nubOffset = type.design == "nested" ? 20 : 0;
 
             render.fillStyle = grad;
@@ -194,6 +205,11 @@
 
         function calculateExpressionWidth(expression) {
 
+            if (expression.type == "int" || expression.type == "string") {
+
+                return render.measureText("" + expression.value).width + 8;
+            }
+
             return 0;
         }
 
@@ -207,7 +223,7 @@
                 render.fillStyle = "white";
                 render.lineWidth = 1;
 
-                const width = render.measureText("" + expression.value).width + 8;
+                const width = calculateExpressionWidth(expression);
 
                 render.fillRect(x, y - 15, width, 20);
                 render.strokeRect(x, y - 15, width, 20);
@@ -225,9 +241,8 @@
 
         let x = 20, y = 20;
 
-        for (const arg of script) {
+        for (const arg of script)
             x, y = drawStatement(x, y, arg);
-        }
     </script>
 </head>
 <body>
