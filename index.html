@@ -37,6 +37,8 @@
         // returns next x,y to draw at
         function drawStatement(x, y, statement) {
 
+            const grad = render.createLinearGradient(0, 0, 0, 30);
+
             // if we have any, process all children so we know where this block ends
             let newX = x;
             let newY = y + 30;
@@ -49,18 +51,23 @@
                     newX, newY = drawStatement(newX, newY, arg);
 
                 newX -= 20;
+
+                render.strokeStyle = "#850";
+                grad.addColorStop(0, "#c70");
+                grad.addColorStop(1, "#e84");
+
+            } else {
+
+                render.strokeStyle = "#45c";
+                grad.addColorStop(0, "#45c");
+                grad.addColorStop(1, "#67e");
             }
 
             render.font = "bold 15px Arial";
 
-            const grad = render.createLinearGradient(0, 0, 0, 30);
-            grad.addColorStop(1, "#67e");
-            grad.addColorStop(0, "#45c"); 
-
             const width = render.measureText(statement.type).width + 20;
             const nubOffset = statement.args ? 20 : 0;
 
-            render.strokeStyle = "#45c";
             render.fillStyle = grad;
             render.lineJoin = "round";
             render.lineWidth = 3;
@@ -112,8 +119,17 @@
             render.fill();
             render.stroke();
 
+            // draw text
+            render.save();
+
+            render.shadowColor = "black";
+            render.shadowBlur = 4;
+            render.shadowOffsetX = 1;
+            render.shadowOffsetY = 1;
             render.fillStyle = "white";
             render.fillText(statement.type, x + 8, y + 20);
+
+            render.restore();
 
             return newX, newY;
         }
