@@ -60,7 +60,7 @@
             },
             "reportVariadicSum": {
                 "format": "_ + _",
-                "design": "round",
+                "design": "diamond",
                 "category": "operator"
             },
             "int": { "design": "input" },
@@ -349,6 +349,25 @@
 
                     render.beginPath();
                     render.roundRect(x, y - 17, width, 24, 12);
+                    render.fill();
+                    render.stroke();
+
+                    drawTextAndArguments(x + 13, y, expression);
+                    break;
+                
+                case "diamond":
+                    render.lineWidth = 1;
+
+                    render.beginPath();
+
+                    render.moveTo(x + 12, y - 17);
+                    render.lineTo(x + width - 12, y - 17);
+                    render.lineTo(x + width, y - 5);
+                    render.lineTo(x + width - 12, y + 7);
+                    render.lineTo(x + 12, y + 7);
+                    render.lineTo(x, y - 5);
+
+                    render.closePath();
                     render.fill();
                     render.stroke();
 
