@@ -49,7 +49,6 @@
                     newX, newY = drawStatement(newX, newY, arg);
 
                 newX -= 20;
-                newY += 10;
             }
 
             render.font = "bold 15px Arial";
@@ -82,7 +81,32 @@
             render.lineTo(x + 10 + nubOffset, y + 35);
             render.lineTo(x + 5  + nubOffset, y + 30);
 
-            render.lineTo(x, y + 30);
+            if (!statement.args) {
+
+                render.lineTo(x, y + 30);
+
+            } else {
+
+                render.lineTo(x + nubOffset, y + 30);
+                render.lineTo(x + nubOffset, newY);
+
+                render.lineTo(x + 5  + nubOffset, newY);
+                render.lineTo(x + 10 + nubOffset, newY + 5);
+                render.lineTo(x + 15 + nubOffset, newY + 5);
+                render.lineTo(x + 20 + nubOffset, newY);
+
+                render.lineTo(x + width, newY);
+                render.lineTo(x + width, newY + 10);
+
+                render.lineTo(x + 20, newY + 10);
+                render.lineTo(x + 15, newY + 15);
+                render.lineTo(x + 10, newY + 15);
+                render.lineTo(x + 5, newY + 10);
+
+                render.lineTo(x, newY + 10);
+
+                newY += 10;
+            }
 
             render.closePath();
             render.fill();
