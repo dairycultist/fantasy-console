@@ -60,7 +60,7 @@
             },
             "reportVariadicSum": {
                 "format": "_ + _",
-                "design": "diamond",
+                "design": "round",
                 "category": "operator"
             },
             "int": { "design": "input" },
@@ -68,61 +68,114 @@
             "string": { "design": "input" }
         };
 
-        const script = [
-            { "type": "receiveGo" },
+        const scripts = [
             {
-                "type": "doRepeat",
-                "args": [
-                    { "type": "int", "value": 10 }
-                ],
-                "children": [
-                    { "type": "forward", "args": [ { "type": "int", "value": 10 } ] },
-                    { "type": "turn", "args": [ { "type": "int", "value": 15 } ] },
+                "x": 20,
+                "y": 20,
+                "blocks": [
+                    { "type": "receiveGo" },
+                    {
+                        "type": "doRepeat",
+                        "args": [
+                            { "type": "int", "value": 10 }
+                        ],
+                        "children": [
+                            { "type": "forward", "args": [ { "type": "int", "value": 10 } ] },
+                            { "type": "turn", "args": [ { "type": "int", "value": 15 } ] },
+                            {
+                                "type": "bubble",
+                                "args": [
+                                    {
+                                        "type": "reportVariadicSum",
+                                        "args": [
+                                            { "type": "int", "value": "5" },
+                                            {
+                                                "type": "reportVariadicSum",
+                                                "args": [
+                                                    { "type": "int", "value": "20" },
+                                                    { "type": "int", "value": "17" }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            { "type": "doWait", "args": [ { "type": "float", "value": 0.2 } ] }
+                        ]
+                    },
                     {
                         "type": "bubble",
                         "args": [
                             {
-                                "type": "reportVariadicSum",
-                                "args": [
-                                    { "type": "int", "value": "5" },
-                                    {
-                                        "type": "reportVariadicSum",
-                                        "args": [
-                                            { "type": "int", "value": "20" },
-                                            { "type": "int", "value": "17" }
-                                        ]
-                                    }
-                                ]
+                                "type": "string",
+                                "value": "Hello!"
                             }
                         ]
                     },
-                    { "type": "doWait", "args": [ { "type": "float", "value": 0.2 } ] }
                 ]
-            },
-            {
-                "type": "bubble",
-                "args": [
-                    {
-                        "type": "string",
-                        "value": "Hello!"
-                    }
-                ]
-            },
+            }
         ];
 
         let render;
 
-        function rerender() {
+        function init() {
 
-            if (!render)
-                render = document.getElementById("canvas").getContext("2d");
+            const canvas = document.getElementById("canvas");
+            render = canvas.getContext("2d");
+
+            // cursors: grab grabbing default text
+
+            let heldScript;
+            let heldOffsetX, heldOffsetY;
+
+            canvas.addEventListener("mousedown", (event) => {
+
+                heldScript = scripts[0];
+                canvas.style.cursor = "grabbing";
+
+                const x = event.offsetX / canvas.offsetWidth * canvas.width;
+                const y = event.offsetY / canvas.offsetHeight * canvas.height;
+
+                heldOffsetX = heldScript.x - x;
+                heldOffsetY = heldScript.y - y;
+
+                rerender();
+            });
+
+            canvas.addEventListener("mousemove", (event) => {
+
+                if (!heldScript)
+                    return;
+
+                const x = event.offsetX / canvas.offsetWidth * canvas.width;
+                const y = event.offsetY / canvas.offsetHeight * canvas.height;
+
+                heldScript.x = x + heldOffsetX;
+                heldScript.y = y + heldOffsetY;
+
+                rerender();
+            });
+
+            document.addEventListener("mouseup", (event) => {
+
+                heldScript = null;
+                canvas.style.cursor = "default";
+            });
+
+            rerender();
+        }
+
+        function rerender() {
 
             render.clearRect(0, 0, render.canvas.width, render.canvas.height);
 
-            let x = 20, y = 20;
+            for (const script of scripts) {
 
-            for (const block of script)
-                x, y = drawStatement(x, y, block);
+                let x = script.x, y = script.y;
+
+                for (const block of script.blocks)
+                    x, y = drawStatement(x, y, block);
+            }
         }
 
         // blocks that stack vertically with other blocks and maybe contain other blocks
@@ -379,7 +432,7 @@
         }
     </script>
 </head>
-<body onload="rerender();">
+<body onload="init();">
     <canvas id="canvas" width="600" height="600" style="border: 1px solid black;"></canvas>
 </body>
 </html>
