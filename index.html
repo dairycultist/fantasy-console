@@ -177,16 +177,21 @@
                 const x = event.offsetX / canvas.offsetWidth * canvas.width;
                 const y = event.offsetY / canvas.offsetHeight * canvas.height;
 
-                if (!blockAABBContainsPoint(x, y, scripts[0].x, scripts[0].y, scripts[0].blocks[0]))
+                for (const script of scripts) {
+
+                    if (!blocksContainPoint(x, y, script.x, script.y, script.blocks).result)
+                        continue;
+
+                    heldScript = script;
+                    canvas.style.cursor = "grabbing";
+
+                    heldOffsetX = heldScript.x - x;
+                    heldOffsetY = heldScript.y - y;
+
+                    rerender();
+
                     return;
-
-                heldScript = scripts[0];
-                canvas.style.cursor = "grabbing";
-
-                heldOffsetX = heldScript.x - x;
-                heldOffsetY = heldScript.y - y;
-
-                rerender();
+                }
             });
 
             canvas.addEventListener("mousemove", (event) => {
@@ -476,6 +481,35 @@
             }
 
             return width;
+        }
+
+        // returns the result + the x,y of the very bottom of the blocks
+        function blocksContainPoint(pointX, pointY, blockX, blockY, blocks) {
+
+            for (const block of blocks) {
+
+                if (blockAABBContainsPoint(pointX, pointY, blockX, blockY, block))
+                    return { result: true };
+
+                blockY += 30;
+
+                if (blockTypes[block.type].design == "nested") {
+
+                    blockX += 20;
+
+                    let result;
+
+                    ({ result, blockX, blockY } = blocksContainPoint(pointX, pointY, blockX, blockY, block.children));
+
+                    if (result)
+                        return { result: true };
+
+                    blockX -= 20;
+                    blockY += 10;
+                }
+            }
+
+            return { result: false, blockX: blockX, blockY: blockY };
         }
 
         function blockAABBContainsPoint(x, y, blockX, blockY, block) {
